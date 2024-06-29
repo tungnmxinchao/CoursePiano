@@ -29,6 +29,9 @@
         <section class="cart_section padding_top">
             <div class="container">
                 <h2 class="text-center">Shopping Cart</h2>
+                <c:forEach items="${messageList}" var="messageList">
+                    <h4 style="color: red"class="text-center">${messageList}</h4>
+                </c:forEach>
                 <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
@@ -45,7 +48,7 @@
                             <form action="cart" method="POST">
                                 <tr>
                                     <td>
-                                        <input type="checkbox" name="" value="ON" />
+                                        <input type="checkbox" name="idCourse" value="${listCart.id}" />
                                     </td>
                                     <td>${listCart.courseName}</td>
                                     <td>${listCart.fee}</td>
@@ -64,9 +67,12 @@
                 <div class="text-right">
                     <h4 id="totalAmount" >Total Amount: ${totalAmount}</h4>
                 </div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-success" onclick="confirmPurchase()">Confirm Purchase</button>
-                </div>
+                <form action="course" method="POST">
+                    <div class="text-center mt-4">
+                        <input style="display: none" type="text" name="arrayCourse" value="" />
+                        <button name="action" value="confirmPurchase"class="btn btn-success">Confirm Purchase</button>
+                    </div>
+                </form>
             </div>
         </section>
         <!-- Cart section end -->
@@ -80,29 +86,23 @@
 
         <!-- Custom JS for cart actions -->
         <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            // Lắng nghe sự kiện khi input thay đổi
-                            const inputs = document.querySelectorAll('input[type="number"]');
-                            inputs.forEach(input => {
-                                input.addEventListener('change', updateTotalAmount);
-                            });
+            document.addEventListener('DOMContentLoaded', function () {
+                // Tìm tất cả các checkbox có name là idCourse
+                const checkboxes = document.querySelectorAll('input[type="checkbox"][name="idCourse"]');
+                const arrayCourseInput = document.querySelector('input[name="arrayCourse"]');
 
-                            // Hàm tính toán và cập nhật tổng số tiền
-                            function updateTotalAmount() {
-                                let totalAmount = 0;
-                                const inputs = document.querySelectorAll('input[type="number"]');
-                                inputs.forEach(input => {
-                                    const id = input.getAttribute('id').replace('input-', '');
-                                    const fee = parseFloat('${listCart.fee}'.replace('.', '').replace('đ', '')); // Chuyển đổi string fee sang số
-                                    const value = parseFloat(input.value); // Lấy giá trị của input
-                                    const subtotal = fee * value; // Tính tổng tiền cho từng mặt hàng
-                                    totalAmount += subtotal; // Cộng dồn vào tổng số tiền
-                                });
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', function () {
+                        // Lấy tất cả các giá trị của checkbox đã chọn
+                        const selectedValues = Array.from(checkboxes)
+                                .filter(cb => cb.checked)
+                                .map(cb => cb.value);
 
-                                // Cập nhật lại nội dung của h4
-                                document.getElementById('totalAmount').textContent = `Total Amount: ${totalAmount.toLocaleString()}đ`; // Hiển thị số tiền có dấu đ separa
-                            }
-                        });
+                        // Gắn giá trị vào thẻ input arrayCourse, ngăn cách bởi dấu phẩy
+                        arrayCourseInput.value = selectedValues.join(',');
+                    });
+                });
+            });
         </script>
     </body>
 </html>

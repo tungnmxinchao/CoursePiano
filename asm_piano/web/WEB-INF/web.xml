@@ -24,6 +24,10 @@
         <servlet-name>RemoveCart</servlet-name>
         <servlet-class>controller.RemoveCart</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ConfirmPurchase</servlet-name>
+        <servlet-class>controller.ConfirmPurchase</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -47,6 +51,10 @@
     <servlet-mapping>
         <servlet-name>RemoveCart</servlet-name>
         <url-pattern>/removeCart</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ConfirmPurchase</servlet-name>
+        <url-pattern>/confirmPurchase</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

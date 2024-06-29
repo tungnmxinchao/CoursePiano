@@ -24,6 +24,7 @@ public class CourseController extends HttpServlet {
     private static final String COURSE_PAGE = "course.jsp";
     private static final String VIEW_DETAILS_CONTROLLER = "courseDetails";
     private static final String ADD_TO_CART_CONTROLLER = "addToCart";
+    private static final String CONFIRM_PURCHASE_CONTROLLER = "confirmPurchase";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -32,7 +33,6 @@ public class CourseController extends HttpServlet {
 
         PageControl pageControl = new PageControl();
         List<CourseResponseDTO> listCourse = null;
-
 
         String url = null;
         if (action == null) {
@@ -60,6 +60,9 @@ public class CourseController extends HttpServlet {
                     break;
                 case "addToCart":
                     url = ADD_TO_CART_CONTROLLER;
+                    break;
+                case "confirmPurchase":
+                    url = CONFIRM_PURCHASE_CONTROLLER;
                     break;
                 default:
                     throw new AssertionError();
