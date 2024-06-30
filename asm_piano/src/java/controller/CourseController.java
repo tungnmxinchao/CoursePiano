@@ -25,6 +25,7 @@ public class CourseController extends HttpServlet {
     private static final String VIEW_DETAILS_CONTROLLER = "courseDetails";
     private static final String ADD_TO_CART_CONTROLLER = "addToCart";
     private static final String CONFIRM_PURCHASE_CONTROLLER = "confirmPurchase";
+    private static final String CONFIRM_ORDER = "confirmOrder";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -63,6 +64,9 @@ public class CourseController extends HttpServlet {
                     break;
                 case "confirmPurchase":
                     url = CONFIRM_PURCHASE_CONTROLLER;
+                    break;
+                case "confirmOrder":
+                    url = CONFIRM_ORDER;
                     break;
                 default:
                     throw new AssertionError();

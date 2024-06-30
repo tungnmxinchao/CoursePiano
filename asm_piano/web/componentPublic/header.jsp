@@ -35,7 +35,7 @@
                                 </div>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="cart.html">
+                                <a class="nav-link" href="cart">
                                     <i class="fas fa-shopping-cart"></i> Cart
                                 </a>
                             </li>

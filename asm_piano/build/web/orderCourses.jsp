@@ -39,7 +39,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <c:forEach items="${listCart}" var="listCart">
+                            <c:forEach items="${listCart}" var="listCart">
                             <form action="cart" method="POST">
                                 <tr>
                                     <td>${listCart.courseName}</td>
@@ -64,18 +64,24 @@
         <section class="order_section padding_top">
             <div class="container">
                 <h2 class="text-center">Order Information</h2>
-                <form action="order" method="POST">
+                <h4 style="color: red" class="text-center">${msg}</h4>
+                <form action="course?action=confirmOrder" method="POST">
                     <div class="form-group">
                         <label for="name">Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" value="${user.fullName}" id="name" name="name" required>
                     </div>
                     <div class="form-group">
                         <label for="address">Address</label>
-                        <input type="text" class="form-control" id="address" name="address" required>
+                        <input type="text" class="form-control" value="${user.address}" id="address" name="address" required>
                     </div>
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="text" class="form-control" id="phone" name="phone" required>
+                        <input type="text" class="form-control" value="${user.phoneNum}" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="optionCharge">
+                            <option selected >Cash payment</option>
+                        </select>
                     </div>
                     <div class="text-center mt-4">
                         <input type="hidden" name="arrayCourse" value="${arrayCourse}">

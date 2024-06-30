@@ -22,7 +22,7 @@ public class UserDAO extends DBContext {
 
         Users user = null;
 
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setString(1, usernameInput);
             ps.setString(2, pass);
@@ -33,8 +33,11 @@ public class UserDAO extends DBContext {
                 String username = rs.getString(2);
                 String password = rs.getString(3);
                 int role = rs.getInt(4);
+                String fullName = rs.getString(5);
+                String address = rs.getString(6);
+                String phoneNumber = rs.getString(7);
 
-                user = new Users(id, username, password, role);
+                user = new Users(id, username, password, role, fullName, address, phoneNumber);
 
             }
 

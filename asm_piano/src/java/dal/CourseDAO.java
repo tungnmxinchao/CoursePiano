@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import model.CourseCart;
 import model.CourseResponseDTO;
 import utils.GetDataUtils;
 
@@ -32,7 +33,7 @@ public class CourseDAO extends DBContext {
     public int findTotalRecord() {
         String sql = "select count(c.courseId) from Courses c\n"
                 + "where c.[status] = 1 and c.quantity > 0";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
 
             rs = ps.executeQuery();
@@ -50,7 +51,7 @@ public class CourseDAO extends DBContext {
     public int findTotalRecordSearchByName(String name) {
         String sql = "select count(c.courseId) from Courses c\n"
                 + "where c.[status] = 1 and c.quantity > 0 and c.[name] like ?";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setString(1, "%" + name + "%");
 
@@ -77,7 +78,7 @@ public class CourseDAO extends DBContext {
                 + "order by c.courseId\n"
                 + "OFFSET ? ROWS\n"
                 + "FETCH NEXT ? ROWS ONLY";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setInt(1, (page - 1) * RECORD_PER_PAGE);
             ps.setInt(2, RECORD_PER_PAGE);
@@ -125,7 +126,7 @@ public class CourseDAO extends DBContext {
                 + "order by c.courseId\n"
                 + "OFFSET ? ROWS\n"
                 + "FETCH NEXT ? ROWS ONLY";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setString(1, "%" + nameInput + "%");
             ps.setInt(2, (page - 1) * RECORD_PER_PAGE);
@@ -165,7 +166,7 @@ public class CourseDAO extends DBContext {
     public int findTotalRecordSearchByCategory(String name, int category) {
         String sql = "select count(c.courseId) from Courses c\n"
                 + "where c.[status] = 1 and c.quantity > 0 and c.[name] like ? and c.categoryId = ?";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setString(1, "%" + name + "%");
             ps.setInt(2, category);
@@ -195,7 +196,7 @@ public class CourseDAO extends DBContext {
                 + "order by c.courseId\n"
                 + "OFFSET ? ROWS\n"
                 + "FETCH NEXT ? ROWS ONLY";
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setString(1, "%" + nameInput + "%");
             ps.setInt(2, categoryInput);
@@ -246,7 +247,7 @@ public class CourseDAO extends DBContext {
                 + "where c.[status] = 1 and c.quantity > 0 and c.courseId = ?";
 
         CourseResponseDTO course = null;
-        try ( Connection connection = new DBContext().connection) {
+        try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
             ps.setInt(1, idCourse);
 
@@ -280,11 +281,67 @@ public class CourseDAO extends DBContext {
         }
         return course;
     }
-    
+
     public static void main(String[] args) {
         CourseDAO cdao = new CourseDAO();
         CourseResponseDTO c = cdao.findCourseByID(1);
         System.out.println(c);
+    }
+
+    public boolean insertOrderAndOrderDetails(String fullName, String address, String phone, int totalMoney, int idUser, List<CourseCart> listPianoOrder) {
+        String sql = "INSERT INTO [dbo].[Orders]\n"
+                + "           ([full_name], [phone_number], [address], [user_id], [total_cost], [status])\n"
+                + "     VALUES (?, ?, ?, ?, ?, ?);";
+
+        String sqlInsertOrderDetails = "INSERT INTO [dbo].[OrderDetails]\n"
+                + "           ([course_id], [course_price], [amount], [order_id])\n"
+                + "     VALUES (?, ?, ?, ?);";
+        String msg = "";
+        
+        try (Connection connection = new DBContext().connection) {
+
+            ps = connection.prepareStatement(sql, ps.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, fullName);
+            ps.setString(2, phone);
+            ps.setString(3, address);
+            ps.setInt(4, idUser);
+            ps.setInt(5, totalMoney);
+            ps.setInt(6, 1);
+
+            int rowAffected = ps.executeUpdate();
+
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int idOrder = generatedKeys.getInt(1);
+                    for (int i = 0; i < listPianoOrder.size(); i++) {
+                        ps = connection.prepareStatement(sqlInsertOrderDetails);
+                        ps.setString(1, listPianoOrder.get(i).getId());
+                        ps.setInt(2, GetDataUtils.parsePrice(listPianoOrder.get(i).getFee()));
+                        ps.setInt(3, listPianoOrder.get(i).getTotal());
+                        ps.setInt(4, idOrder);
+                        
+                         int rowOrderDetailsAffected = ps.executeUpdate();
+                         
+                         if (rowOrderDetailsAffected < 0) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            
+            if (rowAffected > 0) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+
+        return false;
+
     }
 
 }

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import model.CourseCart;
+import model.Users;
 import utils.GetDataUtils;
 
 public class ConfirmPurchase extends HttpServlet {
@@ -26,17 +27,28 @@ public class ConfirmPurchase extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         String arrayCourseRequest = request.getParameter("arrayCourse");
 
+        String msg = "";
+        List<String> messageList = new ArrayList<>();
         String[] arrayCourse = arrayCourseRequest.split(",");
 
         CourseDAO courseDAO = new CourseDAO();
         HttpSession session = request.getSession();
         List<CourseCart> listCart = new ArrayList<>();
-
         HashMap<String, Integer> cartHashMap = (HashMap<String, Integer>) session.getAttribute("cartHashMap");
-        List<String> messageList = new ArrayList<>();
-        String msg = "";
         int totalAmount = 0;
         boolean confirmPurchase = true;
+
+        if (arrayCourseRequest.isEmpty()) {
+            msg = "Please select course piano!";
+
+            //load lai list cart
+            List<CourseCart> listCartConvert = convertHashMapToList(cartHashMap, listCart, request, totalAmount);
+
+            request.setAttribute("listCart", listCartConvert);
+            request.setAttribute("messageList", msg);
+            request.getRequestDispatcher("cart.jsp").forward(request, response);
+            return;
+        }
 
         for (String courseId : arrayCourse) {
             int quantityCourseByID = courseDAO.findCourseByID(Integer.parseInt(courseId)).getQuanity();
@@ -60,27 +72,14 @@ public class ConfirmPurchase extends HttpServlet {
 
         if (confirmPurchase == false) {
             //load lai list cart
-            for (Map.Entry<String, Integer> entry : cartHashMap.entrySet()) {
-                String[] key = entry.getKey().split(" ");
-                String idCourse = key[0];
-                String courseName = key[1] + " " + key[2];
-                String fee = key[3] + key[4];
-                Integer value = entry.getValue();
+            List<CourseCart> listCartConvert = convertHashMapToList(cartHashMap, listCart, request, totalAmount);
 
-                totalAmount += (GetDataUtils.parsePrice(fee) * value);
+            request.setAttribute("listCart", listCartConvert);
 
-                CourseCart course = new CourseCart(idCourse, courseName, fee, value);
-
-                listCart.add(course);
-            }
-
-            request.setAttribute("totalAmount", GetDataUtils.formatToVND(totalAmount));
-            request.setAttribute("listCart", listCart);
-
-            request.setAttribute("messageList", msg);
+            request.setAttribute("messageList", messageList);
             request.getRequestDispatcher("cart.jsp").forward(request, response);
         } else {
-            
+
             //load lai list cart
             for (Map.Entry<String, Integer> entry : cartHashMap.entrySet()) {
                 String[] key = entry.getKey().split(" ");
@@ -89,12 +88,23 @@ public class ConfirmPurchase extends HttpServlet {
                 String fee = key[3] + key[4];
                 Integer value = entry.getValue();
 
-                totalAmount += (GetDataUtils.parsePrice(fee) * value);
-
                 CourseCart course = new CourseCart(idCourse, courseName, fee, value);
 
-                listCart.add(course);
+                for (String courseId : arrayCourse) {
+                    if (idCourse.equals(courseId)) {
+                        totalAmount += (GetDataUtils.parsePrice(fee) * value);
+                        listCart.add(course);
+                    }
+                }
+
             }
+            
+            Users user = (Users) session.getAttribute("user");
+
+            if (user != null) {
+                request.setAttribute("user", user);
+            }
+            session.setAttribute("listPianoOrder", listCart);
             
             request.setAttribute("totalAmount", GetDataUtils.formatToVND(totalAmount));
             request.setAttribute("listCart", listCart);
@@ -118,6 +128,24 @@ public class ConfirmPurchase extends HttpServlet {
     @Override
     public String getServletInfo() {
         return "Short description";
-    }// </editor-fold>
+    }
 
+    private List<CourseCart> convertHashMapToList(HashMap<String, Integer> cartHashMap, List<CourseCart> listCart,
+            HttpServletRequest request, int totalAmount) {
+        for (Map.Entry<String, Integer> entry : cartHashMap.entrySet()) {
+            String[] key = entry.getKey().split(" ");
+            String idCourse = key[0];
+            String courseName = key[1] + " " + key[2];
+            String fee = key[3] + key[4];
+            Integer value = entry.getValue();
+
+            totalAmount += (GetDataUtils.parsePrice(fee) * value);
+
+            CourseCart course = new CourseCart(idCourse, courseName, fee, value);
+
+            listCart.add(course);
+        }
+        request.setAttribute("totalAmount", GetDataUtils.formatToVND(totalAmount));
+        return listCart;
+    }
 }

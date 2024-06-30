@@ -13,15 +13,21 @@ public class Users {
     private String username;
     private String password;
     private int role;
+    private String fullName;
+    private String address;
+    private String phoneNum;
 
     public Users() {
     }
 
-    public Users(int id, String username, String password, int role) {
+    public Users(int id, String username, String password, int role, String fullName, String address, String phoneNum) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
+        this.fullName = fullName;
+        this.address = address;
+        this.phoneNum = phoneNum;
     }
 
     public int getId() {
@@ -56,10 +62,34 @@ public class Users {
         this.role = role;
     }
 
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhoneNum() {
+        return phoneNum;
+    }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
+
     @Override
     public String toString() {
-        return "Users{" + "id=" + id + ", username=" + username + ", password=" + password + ", role=" + role + '}';
+        return "Users{" + "id=" + id + ", username=" + username + ", password=" + password + ", role=" + role + ", fullName=" + fullName + ", address=" + address + ", phoneNum=" + phoneNum + '}';
     }
-    
+
     
 }
