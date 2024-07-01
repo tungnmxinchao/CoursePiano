@@ -10,10 +10,13 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import model.CourseCart;
 import model.CourseResponseDTO;
+import model.OrderDetailsResponse;
+import model.OrderResponse;
 import utils.GetDataUtils;
 
 /**
@@ -25,9 +28,13 @@ public class CourseDAO extends DBContext {
     private PreparedStatement ps;
     private ResultSet rs;
     private List<CourseResponseDTO> listCourse;
+    private List<OrderResponse> listOrder;
+    private List<OrderDetailsResponse> listOrderDetails;
 
     public CourseDAO() {
         listCourse = new ArrayList<>();
+        listOrder = new ArrayList<>();
+        listOrderDetails = new ArrayList<>();
     }
 
     public int findTotalRecord() {
@@ -43,6 +50,8 @@ public class CourseDAO extends DBContext {
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
         }
         return -1;
 
@@ -62,6 +71,8 @@ public class CourseDAO extends DBContext {
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
         }
         return -1;
     }
@@ -109,6 +120,8 @@ public class CourseDAO extends DBContext {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
         }
         return listCourse;
 
@@ -158,6 +171,8 @@ public class CourseDAO extends DBContext {
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
         }
         return listCourse;
 
@@ -288,7 +303,8 @@ public class CourseDAO extends DBContext {
         System.out.println(c);
     }
 
-    public boolean insertOrderAndOrderDetails(String fullName, String address, String phone, int totalMoney, int idUser, List<CourseCart> listPianoOrder) {
+    public boolean insertOrderAndOrderDetails(String fullName, String address,
+            String phone, int totalMoney, int idUser, List<CourseCart> listPianoOrder) {
         String sql = "INSERT INTO [dbo].[Orders]\n"
                 + "           ([full_name], [phone_number], [address], [user_id], [total_cost], [status])\n"
                 + "     VALUES (?, ?, ?, ?, ?, ?);";
@@ -297,7 +313,7 @@ public class CourseDAO extends DBContext {
                 + "           ([course_id], [course_price], [amount], [order_id])\n"
                 + "     VALUES (?, ?, ?, ?);";
         String msg = "";
-        
+
         try (Connection connection = new DBContext().connection) {
 
             ps = connection.prepareStatement(sql, ps.RETURN_GENERATED_KEYS);
@@ -320,16 +336,16 @@ public class CourseDAO extends DBContext {
                         ps.setInt(2, GetDataUtils.parsePrice(listPianoOrder.get(i).getFee()));
                         ps.setInt(3, listPianoOrder.get(i).getTotal());
                         ps.setInt(4, idOrder);
-                        
-                         int rowOrderDetailsAffected = ps.executeUpdate();
-                         
-                         if (rowOrderDetailsAffected < 0) {
+
+                        int rowOrderDetailsAffected = ps.executeUpdate();
+
+                        if (rowOrderDetailsAffected < 0) {
                             return false;
                         }
                     }
                 }
             }
-            
+
             if (rowAffected > 0) {
                 return true;
             }
@@ -342,6 +358,172 @@ public class CourseDAO extends DBContext {
 
         return false;
 
+    }
+
+    public int findTotalOrdersRecord(int idUser) {
+        String sql = "select count(o.order_id) from Orders o\n"
+                + "where o.[user_id] = ?";
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+
+            ps.setInt(1, idUser);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+        return -1;
+
+    }
+
+    public List<OrderResponse> findOrderByPage(int page, int userID) {
+        String sql = "select * from Orders o\n"
+                + "where o.[user_id] = ?\n"
+                + "order by o.order_id desc\n"
+                + "OFFSET ? ROWS\n"
+                + "FETCH NEXT ? ROWS ONLY";
+
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, userID);
+            ps.setInt(2, (page - 1) * RECORD_PER_PAGE);
+            ps.setInt(3, RECORD_PER_PAGE);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int order_id = rs.getInt(1);
+                Timestamp orderDate = rs.getTimestamp(2);
+                String fullName = rs.getString(3);
+                String phone = rs.getString(4);
+                String address = rs.getString(5);
+                int idUser = rs.getInt(6);
+                int totalCost = rs.getInt(7);
+                int status = rs.getInt(8);
+
+                OrderResponse order = new OrderResponse(order_id, orderDate, fullName,
+                        phone, address, userID, GetDataUtils.formatToVND(totalCost), status);
+
+                listOrder.add(order);
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+
+        return listOrder;
+
+    }
+
+    public List<OrderDetailsResponse> findOrderDetailsByOrderID(int orderIdInput) {
+        String sql = "select o.order_details_id, o.course_id, o.course_price, o.amount,\n"
+                + "o.order_id, c.[image], c.[name], c.[description] from OrderDetails o\n"
+                + "join Courses c\n"
+                + "on o.course_id = c.courseId\n"
+                + "where o.order_id = ?";
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+
+            ps.setInt(1, orderIdInput);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int orderDetailsID = rs.getInt(1);
+                int courseID = rs.getInt(2);
+                int coursePrice = rs.getInt(3);
+                int amount = rs.getInt(4);
+                int orderID = rs.getInt(5);
+                String image = rs.getString(6);
+                String nameCourse = rs.getString(7);
+                String description = rs.getString(8);
+
+                OrderDetailsResponse orderDetails = new OrderDetailsResponse(orderDetailsID,
+                        courseID, GetDataUtils.formatToVND(coursePrice), amount, orderID,
+                        image, nameCourse, description);
+
+                listOrderDetails.add(orderDetails);
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+        return listOrderDetails;
+    }
+
+    public int findTotalOrderBySearch(int idUser, int orderID) {
+        String sql = "select count(o.order_id) from Orders o\n"
+                + "where o.[user_id] = ? and  o.order_id = ?";
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+
+            ps.setInt(1, idUser);
+            ps.setInt(2, orderID);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+        return -1;
+    }
+
+    public List<OrderResponse> findOrderBySearchAndPage(int page, int idUserInput, int orderID) {
+        String sql = "select * from Orders o\n"
+                + "where o.[user_id] = ? and o.order_id = ?\n"
+                + "order by o.order_id desc\n"
+                + "OFFSET ? ROWS\n"
+                + "FETCH NEXT ? ROWS ONLY";
+
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+            ps.setInt(1, idUserInput);
+            ps.setInt(2, orderID);
+            ps.setInt(3, (page - 1) * RECORD_PER_PAGE);
+            ps.setInt(4, RECORD_PER_PAGE);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int order_id = rs.getInt(1);
+                Timestamp orderDate = rs.getTimestamp(2);
+                String fullName = rs.getString(3);
+                String phone = rs.getString(4);
+                String address = rs.getString(5);
+                int idUser = rs.getInt(6);
+                int totalCost = rs.getInt(7);
+                int status = rs.getInt(8);
+
+                OrderResponse order = new OrderResponse(order_id, orderDate, fullName,
+                        phone, address, idUser, GetDataUtils.formatToVND(totalCost), status);
+
+                listOrder.add(order);
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+
+        return listOrder;
     }
 
 }

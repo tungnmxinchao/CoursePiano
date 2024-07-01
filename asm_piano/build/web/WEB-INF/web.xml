@@ -32,6 +32,14 @@
         <servlet-name>ConfirmOrder</servlet-name>
         <servlet-class>controller.ConfirmOrder</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>TrackingOrdersByUserController</servlet-name>
+        <servlet-class>controller.TrackingOrdersByUserController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ViewDetailsOrders</servlet-name>
+        <servlet-class>controller.ViewDetailsOrders</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -63,6 +71,14 @@
     <servlet-mapping>
         <servlet-name>ConfirmOrder</servlet-name>
         <url-pattern>/confirmOrder</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>TrackingOrdersByUserController</servlet-name>
+        <url-pattern>/trackingOrderByUser</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ViewDetailsOrders</servlet-name>
+        <url-pattern>/viewDetailsOrders</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

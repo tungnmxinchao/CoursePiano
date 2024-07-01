@@ -25,20 +25,20 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="course">Courses</a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="blog.html" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Pages
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="single-blog.html">Single blog</a>
-                                    <a class="dropdown-item" href="elements.html">Elements</a>
-                                </div>
-                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="cart">
                                     <i class="fas fa-shopping-cart"></i> Cart
                                 </a>
                             </li>
+                            <c:if test="${sessionScope.user != null}">
+                                <li class="nav-item dropdown">
+                                    <a>${sessionScope.user.username}</a>
+                                    
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="trackingOrderByUser">Tracking Orders</a>
+                                    </div>
+                                </li>
+                            </c:if>
                             <c:if test="${sessionScope.user == null}">
                                 <li class="d-none d-lg-block">
                                     <a class="btn_1" href="home?action=login">Login Now</a>
