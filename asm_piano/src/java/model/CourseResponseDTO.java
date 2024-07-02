@@ -5,6 +5,7 @@
 package model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 /**
  *
@@ -24,11 +25,12 @@ public class CourseResponseDTO {
     private int quanity;
     private String userCreated;
     private String category_name;
+    private Timestamp lastUpdate;
 
     public CourseResponseDTO() {
     }
 
-    public CourseResponseDTO(int id, String name, String image, String description, String fee, Date startDate, Date endDate, int category, int createdBy, boolean status, int quanity, String userCreated, String category_name) {
+    public CourseResponseDTO(int id, String name, String image, String description, String fee, Date startDate, Date endDate, int category, int createdBy, boolean status, int quanity, String userCreated, String category_name, Timestamp lastUpdate) {
         this.id = id;
         this.name = name;
         this.image = image;
@@ -42,6 +44,7 @@ public class CourseResponseDTO {
         this.quanity = quanity;
         this.userCreated = userCreated;
         this.category_name = category_name;
+        this.lastUpdate = lastUpdate;
     }
 
     public int getId() {
@@ -148,14 +151,17 @@ public class CourseResponseDTO {
         this.category_name = category_name;
     }
 
-    @Override
-    public String toString() {
-        return "CourseResponseDTO{" + "id=" + id + ", name=" + name + ", image=" + image + ", description=" + description + ", fee=" + fee + ", startDate=" + startDate + ", endDate=" + endDate + ", category=" + category + ", createdBy=" + createdBy + ", status=" + status + ", quanity=" + quanity + ", userCreated=" + userCreated + ", category_name=" + category_name + '}';
+    public Timestamp getLastUpdate() {
+        return lastUpdate;
     }
 
-    
-    
-    
-    
-    
+    public void setLastUpdate(Timestamp lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    @Override
+    public String toString() {
+        return "CourseResponseDTO{" + "id=" + id + ", name=" + name + ", image=" + image + ", description=" + description + ", fee=" + fee + ", startDate=" + startDate + ", endDate=" + endDate + ", category=" + category + ", createdBy=" + createdBy + ", status=" + status + ", quanity=" + quanity + ", userCreated=" + userCreated + ", category_name=" + category_name + ", lastUpdate=" + lastUpdate + '}';
+    }
+  
 }

@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import model.Category;
 import model.CourseCart;
 import model.CourseResponseDTO;
 import model.OrderDetailsResponse;
@@ -30,11 +31,13 @@ public class CourseDAO extends DBContext {
     private List<CourseResponseDTO> listCourse;
     private List<OrderResponse> listOrder;
     private List<OrderDetailsResponse> listOrderDetails;
+    private List<Category> listCategory;
 
     public CourseDAO() {
         listCourse = new ArrayList<>();
         listOrder = new ArrayList<>();
         listOrderDetails = new ArrayList<>();
+        listCategory = new ArrayList<>();
     }
 
     public int findTotalRecord() {
@@ -80,7 +83,7 @@ public class CourseDAO extends DBContext {
     public List<CourseResponseDTO> findCourseByPage(int page) {
         String sql = "select c.courseId, c.[name], c.[image], c.[description], c.tuition_fee, \n"
                 + "c.[start_date], c.end_date, c.categoryId, c.createdBy, c.[status], c.quantity, \n"
-                + "u.username, cg.category_name from Courses c\n"
+                + "u.username, cg.category_name , c.lastUpdate from Courses c\n"
                 + "join Users u\n"
                 + "on c.createdBy = u.id\n"
                 + "join Category cg\n"
@@ -110,10 +113,12 @@ public class CourseDAO extends DBContext {
                 int quantity = rs.getInt(11);
                 String userCreated = rs.getString(12);
                 String categoryName = rs.getString(13);
+                Timestamp lastUpdate = rs.getTimestamp(14);
 
                 CourseResponseDTO c = new CourseResponseDTO(id, name, image,
-                        description, GetDataUtils.formatToVND(fee), stardDate, endDate, category, createdBy,
-                        status, quantity, userCreated, categoryName);
+                        description, GetDataUtils.formatToVND(fee), stardDate,
+                        endDate, category, createdBy,
+                        status, quantity, userCreated, categoryName, lastUpdate);
 
                 listCourse.add(c);
             }
@@ -130,7 +135,7 @@ public class CourseDAO extends DBContext {
     public List<CourseResponseDTO> findCourseByName(int page, String nameInput) {
         String sql = "select c.courseId, c.[name], c.[image], c.[description], c.tuition_fee, \n"
                 + "c.[start_date], c.end_date, c.categoryId, c.createdBy, c.[status], c.quantity, \n"
-                + "u.username, cg.category_name from Courses c\n"
+                + "u.username, cg.category_name, c.lastUpdate from Courses c\n"
                 + "join Users u\n"
                 + "on c.createdBy = u.id\n"
                 + "join Category cg\n"
@@ -161,10 +166,11 @@ public class CourseDAO extends DBContext {
                 int quantity = rs.getInt(11);
                 String userCreated = rs.getString(12);
                 String categoryName = rs.getString(13);
+                Timestamp lastUpdate = rs.getTimestamp(14);
 
                 CourseResponseDTO c = new CourseResponseDTO(id, name, image,
                         description, GetDataUtils.formatToVND(fee), stardDate, endDate, category, createdBy,
-                        status, quantity, userCreated, categoryName);
+                        status, quantity, userCreated, categoryName, lastUpdate);
 
                 listCourse.add(c);
             }
@@ -202,7 +208,7 @@ public class CourseDAO extends DBContext {
     public List<CourseResponseDTO> findCourseByCategory(int page, String nameInput, int categoryInput) {
         String sql = "select c.courseId, c.[name], c.[image], c.[description], c.tuition_fee, \n"
                 + "c.[start_date], c.end_date, c.categoryId, c.createdBy, c.[status], c.quantity, \n"
-                + "u.username, cg.category_name from Courses c\n"
+                + "u.username, cg.category_name, c.lastUpdate from Courses c\n"
                 + "join Users u\n"
                 + "on c.createdBy = u.id\n"
                 + "join Category cg\n"
@@ -234,10 +240,11 @@ public class CourseDAO extends DBContext {
                 int quantity = rs.getInt(11);
                 String userCreated = rs.getString(12);
                 String categoryName = rs.getString(13);
+                Timestamp lastUpdate = rs.getTimestamp(14);
 
                 CourseResponseDTO c = new CourseResponseDTO(id, name, image,
                         description, GetDataUtils.formatToVND(fee), stardDate, endDate, category, createdBy,
-                        status, quantity, userCreated, categoryName);
+                        status, quantity, userCreated, categoryName, lastUpdate);
 
                 listCourse.add(c);
             }
@@ -254,7 +261,7 @@ public class CourseDAO extends DBContext {
     public CourseResponseDTO findCourseByID(int idCourse) {
         String sql = "select c.courseId, c.[name], c.[image], c.[description], c.tuition_fee, \n"
                 + "c.[start_date], c.end_date, c.categoryId, c.createdBy, c.[status], c.quantity, \n"
-                + "u.username, cg.category_name from Courses c\n"
+                + "u.username, cg.category_name, c.lastUpdate from Courses c\n"
                 + "join Users u\n"
                 + "on c.createdBy = u.id\n"
                 + "join Category cg\n"
@@ -282,10 +289,11 @@ public class CourseDAO extends DBContext {
                 int quantity = rs.getInt(11);
                 String userCreated = rs.getString(12);
                 String categoryName = rs.getString(13);
+                Timestamp lastUpdate = rs.getTimestamp(14);
 
                 course = new CourseResponseDTO(id, name, image,
                         description, GetDataUtils.formatToVND(fee), stardDate, endDate, category, createdBy,
-                        status, quantity, userCreated, categoryName);
+                        status, quantity, userCreated, categoryName, lastUpdate);
 
             }
 
@@ -524,6 +532,106 @@ public class CourseDAO extends DBContext {
         }
 
         return listOrder;
+    }
+
+    public boolean addCourse(String name, String image, String description,
+            int fee, String startDate, String endDate, int category, int createdBy,
+            int status, int quantity, String lastUpdate) {
+
+        String sql = "INSERT INTO [dbo].[Courses] \n"
+                + "           ([name], [image], [description], [tuition_fee], [start_date], [end_date], [categoryId], [createdBy], [status], [quantity], [lastUpdate]) \n"
+                + "     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, name);
+            ps.setString(2, image);
+            ps.setString(3, description);
+            ps.setInt(4, fee);
+            ps.setString(5, startDate);
+            ps.setString(6, endDate);
+            ps.setInt(7, category);
+            ps.setInt(8, createdBy);
+            ps.setInt(9, status);
+            ps.setInt(10, quantity);
+            ps.setString(11, lastUpdate);
+
+            int rowAffected = ps.executeUpdate();
+
+            if (rowAffected > 0) {
+                return true;
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(rs, ps);
+        }
+
+        return false;
+
+    }
+
+    public boolean updateCourse(int idCourse, String name, String image, String description,
+            int fee, String startDate, String endDate, int category, int createdBy,
+            int status, int quantity, String lastUpdate) {
+
+        String sql = "UPDATE [dbo].[Courses] \n"
+                + "SET [name] = ?, [image] = ?, [description] = ?, [tuition_fee] = ?, [start_date] = ?, [end_date] = ?, [categoryId] = ?, [createdBy] = ?, [status] = ?, [quantity] = ?, [lastUpdate] = ? \n"
+                + "WHERE [courseId] = ?";
+
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+
+            ps.setString(1, name);
+            ps.setString(2, image);
+            ps.setString(3, description);
+            ps.setInt(4, fee);
+            ps.setString(5, startDate);
+            ps.setString(6, endDate);
+            ps.setInt(7, category);
+            ps.setInt(8, createdBy);
+            ps.setInt(9, status);
+            ps.setInt(10, quantity);
+            ps.setString(11, lastUpdate);
+            ps.setInt(12, idCourse);
+
+            int rowAffected = ps.executeUpdate();
+
+            return rowAffected > 0;
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(null, ps);
+        }
+
+        return false;
+    }
+
+    public List<Category> findAllCategory() {
+        String sql = "select * from Category";
+
+        try (Connection connection = new DBContext().connection) {
+            ps = connection.prepareStatement(sql);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                String nameCategory = rs.getString(2);
+
+                Category category = new Category(id, nameCategory);
+
+                listCategory.add(category);
+            }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            DBContext.closeResultSetAndStatement(null, ps);
+        }
+        return listCategory;
     }
 
 }

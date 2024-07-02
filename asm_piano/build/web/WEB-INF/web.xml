@@ -40,6 +40,18 @@
         <servlet-name>ViewDetailsOrders</servlet-name>
         <servlet-class>controller.ViewDetailsOrders</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ManageCourseController</servlet-name>
+        <servlet-class>controller.ManageCourseController</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>PageAddCourse</servlet-name>
+        <servlet-class>controller.PageAddCourse</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>AddCourse</servlet-name>
+        <servlet-class>controller.AddCourse</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>HomeController</servlet-name>
         <url-pattern>/home</url-pattern>
@@ -79,6 +91,18 @@
     <servlet-mapping>
         <servlet-name>ViewDetailsOrders</servlet-name>
         <url-pattern>/viewDetailsOrders</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManageCourseController</servlet-name>
+        <url-pattern>/manageCourse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>PageAddCourse</servlet-name>
+        <url-pattern>/pageAddCourse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AddCourse</servlet-name>
+        <url-pattern>/addCourse</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>
