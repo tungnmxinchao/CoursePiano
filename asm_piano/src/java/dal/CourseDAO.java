@@ -574,27 +574,52 @@ public class CourseDAO extends DBContext {
 
     public boolean updateCourse(int idCourse, String name, String image, String description,
             int fee, String startDate, String endDate, int category, int createdBy,
-            int status, int quantity, String lastUpdate) {
+            int status, int quantity, String lastUpdate, int modeUpdateImage) {
 
-        String sql = "UPDATE [dbo].[Courses] \n"
-                + "SET [name] = ?, [image] = ?, [description] = ?, [tuition_fee] = ?, [start_date] = ?, [end_date] = ?, [categoryId] = ?, [createdBy] = ?, [status] = ?, [quantity] = ?, [lastUpdate] = ? \n"
-                + "WHERE [courseId] = ?";
+        String sql = "";
+
+        switch (modeUpdateImage) {
+            case 0:
+                sql = "UPDATE [dbo].[Courses] \n"
+                        + "SET [name] = ?, [description] = ?, [tuition_fee] = ?, [start_date] = ?, [end_date] = ?, [categoryId] = ?, [createdBy] = ?, [status] = ?, [quantity] = ?, [lastUpdate] = ? \n"
+                        + "WHERE [courseId] = ?";
+                break;
+            case 1:
+                sql = "UPDATE [dbo].[Courses] \n"
+                        + "SET [name] = ?, [image] = ?, [description] = ?, [tuition_fee] = ?, [start_date] = ?, [end_date] = ?, [categoryId] = ?, [createdBy] = ?, [status] = ?, [quantity] = ?, [lastUpdate] = ? \n"
+                        + "WHERE [courseId] = ?";
+                break;
+        }
 
         try (Connection connection = new DBContext().connection) {
             ps = connection.prepareStatement(sql);
 
             ps.setString(1, name);
-            ps.setString(2, image);
-            ps.setString(3, description);
-            ps.setInt(4, fee);
-            ps.setString(5, startDate);
-            ps.setString(6, endDate);
-            ps.setInt(7, category);
-            ps.setInt(8, createdBy);
-            ps.setInt(9, status);
-            ps.setInt(10, quantity);
-            ps.setString(11, lastUpdate);
-            ps.setInt(12, idCourse);
+
+            if (modeUpdateImage == 0) {
+                ps.setString(2, description);
+                ps.setInt(3, fee);
+                ps.setString(4, startDate);
+                ps.setString(5, endDate);
+                ps.setInt(6, category);
+                ps.setInt(7, createdBy);
+                ps.setInt(8, status);
+                ps.setInt(9, quantity);
+                ps.setString(10, lastUpdate);
+                ps.setInt(11, idCourse);
+            } else {
+                ps.setString(2, image);
+                ps.setString(3, description);
+                ps.setInt(4, fee);
+                ps.setString(5, startDate);
+                ps.setString(6, endDate);
+                ps.setInt(7, category);
+                ps.setInt(8, createdBy);
+                ps.setInt(9, status);
+                ps.setInt(10, quantity);
+                ps.setString(11, lastUpdate);
+                ps.setInt(12, idCourse);
+            }
 
             int rowAffected = ps.executeUpdate();
 

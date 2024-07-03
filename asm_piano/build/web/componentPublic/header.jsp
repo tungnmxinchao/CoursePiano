@@ -30,18 +30,32 @@
                                     <i class="fas fa-shopping-cart"></i> Cart
                                 </a>
                             </li>
-                            <c:if test="${sessionScope.user != null}">
+                            <c:if test="${sessionScope.user.role == 0}">
                                 <li class="nav-item dropdown">
                                     <a>${sessionScope.user.username}</a>
-                                    
+
                                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                                         <a class="dropdown-item" href="trackingOrderByUser">Tracking Orders</a>
+                                    </div>
+                                </li>
+                            </c:if>
+                            <c:if test="${sessionScope.user.role == 1}">
+                                <li class="nav-item dropdown">
+                                    <a>${sessionScope.user.username}</a>
+
+                                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="manageCourse">Manage Course</a>
                                     </div>
                                 </li>
                             </c:if>
                             <c:if test="${sessionScope.user == null}">
                                 <li class="d-none d-lg-block">
                                     <a class="btn_1" href="home?action=login">Login Now</a>
+                                </li>
+                            </c:if>
+                            <c:if test="${sessionScope.user != null}">
+                                <li class="d-none d-lg-block">
+                                    <a class="btn_1" href="home?action=logout">Logout</a>
                                 </li>
                             </c:if>
                         </ul>

@@ -20,6 +20,7 @@ public class HomeController extends HttpServlet {
 
     private static final String HOME_PAGE = "home.jsp";
     private static final String LOGIN_CONTROLLER = "login";
+    private static final String LOGOUT_CONTROLLER = "logout";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -28,10 +29,13 @@ public class HomeController extends HttpServlet {
         String url = null;
 
         HttpSession session = request.getSession();
-
-        HashMap<String, Integer> cartHashMap = new HashMap<>();
-        session.setAttribute("cartHashMap", cartHashMap);
+        HashMap<String, Integer> cartHashMapSession = (HashMap<String, Integer>) session.getAttribute("cartHashMap");
         
+        if(cartHashMapSession.isEmpty()){
+             HashMap<String, Integer> cartHashMap = new HashMap<>();
+             session.setAttribute("cartHashMap", cartHashMap);
+        }
+
         if (action == null) {
             url = HOME_PAGE;
         }
@@ -40,6 +44,9 @@ public class HomeController extends HttpServlet {
                 case "login":
                     url = LOGIN_CONTROLLER;
                     break;
+                case "logout":
+                    url = LOGOUT_CONTROLLER;
+                    return;
                 default:
                     throw new AssertionError();
             }

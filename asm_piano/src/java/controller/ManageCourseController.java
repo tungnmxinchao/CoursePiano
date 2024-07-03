@@ -32,6 +32,8 @@ public class ManageCourseController extends HttpServlet {
     private static final String PAGE_MANAGE_COURSE = "manageCourse.jsp";
     private static final String PAGE_ADD_COURSE = "pageAddCourse";
     private static final String ADD_COURSE_CONTROLLER = "addCourse";
+    private static final String ADMIN_VIEW_DETAILS_COURSE_CONTROLLER = "adminViewCourse";
+    private static final String UPDATE_COURSE_CONTROLLER = "updateCourse";
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -65,6 +67,12 @@ public class ManageCourseController extends HttpServlet {
                     break;
                 case "addCourse":
                     url = ADD_COURSE_CONTROLLER;
+                    break;
+                case "adminViewCourse":
+                    url = ADMIN_VIEW_DETAILS_COURSE_CONTROLLER;
+                    break;
+                case "updateCourse":
+                    url = UPDATE_COURSE_CONTROLLER;
                     break;
                 default:
                     throw new AssertionError();

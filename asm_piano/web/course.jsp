@@ -82,7 +82,7 @@
                     <c:forEach items="${listCourse}" var="listCourse">
                         <div class="col-sm-6 col-lg-4">
                             <div class="single_special_cource">
-                                <img src="${listCourse.image}" class="special_img" alt="">
+                                <img src="${listCourse.image}" class="special_img img-fluid" alt="">
                                 <div class="special_cource_text">
                                     <a href="course?action=viewCourseDetails&idCourse=${listCourse.id}" class="btn_4">${listCourse.category_name}</a>
                                     <h4>${listCourse.fee}</h4>
