@@ -31,7 +31,7 @@ public class HomeController extends HttpServlet {
         HttpSession session = request.getSession();
         HashMap<String, Integer> cartHashMapSession = (HashMap<String, Integer>) session.getAttribute("cartHashMap");
         
-        if(cartHashMapSession.isEmpty()){
+        if(cartHashMapSession == null || cartHashMapSession.isEmpty()){
              HashMap<String, Integer> cartHashMap = new HashMap<>();
              session.setAttribute("cartHashMap", cartHashMap);
         }
